@@ -1,0 +1,36 @@
+description: 2025-02-18 v1
+heat_template_version: '2021-04-16'
+
+resources:
+  mhq-group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: My security group for app instance
+      rules:
+        - ethertype: IPv4
+          port_range_min: 22
+          port_range_max: 22
+          protocol: tcp
+          remote_ip_prefix: 0.0.0.0/0
+
+  server-01-port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: 17eae9b6-2168-4a07-a0d3-66d5ad2a9f0e
+      security_groups:
+        - default
+        - get_resource: mhq-group
+
+  mhq-server:
+    type: OS::Nova::Server
+    depends_on:
+      - mhq-group
+    properties:
+      name: s-guseva-2025
+      availability_zone: nova
+      flavor: m1.small
+      image: d608627a-ef62-452d-8a74-1c307cbe276d
+      key_name: 2025-guseva
+      networks:
+        - port:
+            get_resource: server-01-port
