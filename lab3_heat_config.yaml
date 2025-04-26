@@ -2,7 +2,7 @@ description: 2025-02-18 v1
 heat_template_version: '2021-04-16'
 
 resources:
-  mhq-group:
+  guseva-group:
     type: OS::Neutron::SecurityGroup
     properties:
       description: My security group for app instance
@@ -19,12 +19,12 @@ resources:
       network_id: 17eae9b6-2168-4a07-a0d3-66d5ad2a9f0e
       security_groups:
         - default
-        - get_resource: mhq-group
+        - get_resource: guseva-group
 
-  mhq-server:
+  guseva-server:
     type: OS::Nova::Server
     depends_on:
-      - mhq-group
+      - guseva-group
     properties:
       name: s-guseva-2025
       availability_zone: nova
