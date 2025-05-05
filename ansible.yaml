@@ -70,14 +70,6 @@
         state: present
       when: not docker_bin.stat.exists
 
-    - name: Создать симлинк /usr/local/bin/docker-compose → плагину v2
-      file:
-        src: /usr/lib/docker/cli-plugins/docker-compose
-        dest: /usr/local/bin/docker-compose
-        state: link
-        mode: '0755'
-      when: not docker_bin.stat.exists
-
     - name: Убедиться, что демон Docker запущен и включён при старте
       ansible.builtin.service:
         name: docker
