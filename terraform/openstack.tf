@@ -1,9 +1,6 @@
 terraform {
   required_version = ">= 1.11.2"
 
-terraform {
-  required_version = ">= 1.11.2"
-
   required_providers {
     openstack = {
       source  = "local/openstack"
