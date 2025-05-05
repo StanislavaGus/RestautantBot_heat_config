@@ -18,7 +18,7 @@ provider "openstack" {
 
 # --- Получаем существующую сеть по имени ---
 data "openstack_networking_network_v2" "students_net" {
-  name = "students-net"
+  name = "sutdents-net"
 }
 
 # --- Берём стандартную security group по имени "default" ---
