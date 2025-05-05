@@ -60,7 +60,7 @@ resource "openstack_compute_instance_v2" "guseva_server" {
   flavor_name       = "m1.small"
   image_id          = "d608627a-ef62-452d-8a74-1c307cbe276d"  # ubuntu 22.04
   availability_zone = "nova"
-  key_pair          = "guseva_deploy_key"
+  key_pair          = "2025-guseva"
 
   network {
     port = openstack_networking_port_v2.server_port.id
