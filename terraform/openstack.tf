@@ -6,7 +6,7 @@ terraform {
     }
     null = {
       source  = "local/null"
-      version = "3.2.1"
+      version = "3.2.0"
     }
     time = {
       source  = "local/time"
