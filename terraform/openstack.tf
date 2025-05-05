@@ -1,16 +1,10 @@
 terraform {
+  required_version = ">= 1.11.2"
+
   required_providers {
     openstack = {
-      source  = "local/openstack"
+      source  = "terraform-provider-openstack/openstack"
       version = "3.0.0"
-    }
-    null = {
-      source  = "local/null"
-      version = "3.2.0"
-    }
-    time = {
-      source  = "local/time"
-      version = "0.10.0"
     }
   }
 }
@@ -66,7 +60,7 @@ resource "openstack_compute_instance_v2" "guseva_server" {
   flavor_name       = "m1.small"
   image_id          = "d608627a-ef62-452d-8a74-1c307cbe276d"  # ubuntu 22.04
   availability_zone = "nova"
-  key_pair          = "guseva1"
+  key_pair          = "guseva_deploy_key"
 
   network {
     port = openstack_networking_port_v2.server_port.id
