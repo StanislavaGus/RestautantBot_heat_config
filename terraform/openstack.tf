@@ -1,16 +1,10 @@
 terraform {
+  required_version = ">= 1.11.2"
+
   required_providers {
     openstack = {
-      source  = "local/openstack"
-      version = "1.52.1"
-    }
-    null = {
-      source  = "local/null"
-      version = "3.2.1"
-    }
-    time = {
-      source  = "local/time"
-      version = "0.10.0"
+      source  = "terraform-provider-openstack/openstack"
+      version = "3.0.0"
     }
   }
 }
