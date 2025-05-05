@@ -1,0 +1,168 @@
+---
+- name: Deploy Dispatcher‐App Stack via Ansible
+  hosts: all
+  become: yes
+
+  vars:
+    # Репозиторий с вашим docker-compose.yml и .env
+    project_repo: "https://github.com/StanislavaGus/Telegram_Restaurant_Bot.git"
+    project_dest: "restaurant-bot"
+
+  tasks:
+    - name: Обновить apt-кэш и установить базовые пакеты
+      apt:
+        update_cache: yes
+        name:
+          - git
+          - python3
+          - python3-pip
+          - openjdk-21-jdk
+          - maven
+        state: present
+
+    - name: Установить Docker SDK для Python
+      pip:
+        name: docker
+        executable: pip3
+
+    - name: Проверить, установлен ли Docker
+      stat:
+        path: /usr/bin/docker
+      register: docker_bin
+
+    - name: Удалить старый пакет docker.io (если установлен)
+      apt:
+        name:
+          - docker.io
+          - containerd
+        state: absent
+        purge: yes
+      when: not docker_bin.stat.exists
+
+    - name: Добавить GPG-ключ Docker
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /etc/apt/keyrings/docker.gpg
+      when: not docker_bin.stat.exists
+
+    - name: Добавить официальный репозиторий Docker
+      ansible.builtin.apt_repository:
+        repo: >
+          deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg]
+          https://download.docker.com/linux/ubuntu
+          {{ ansible_lsb.codename }} stable
+        filename: docker
+      when: not docker_bin.stat.exists
+
+    - name: Обновить кэш apt после добавления репо
+      ansible.builtin.apt:
+        update_cache: yes
+      when: not docker_bin.stat.exists
+
+    - name: Установить Docker CE и плагины Buildx и Compose v2
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      when: not docker_bin.stat.exists
+
+    - name: Создать симлинк /usr/local/bin/docker-compose → плагину v2
+      file:
+        src: /usr/lib/docker/cli-plugins/docker-compose
+        dest: /usr/local/bin/docker-compose
+        state: link
+        mode: '0755'
+      when: not docker_bin.stat.exists
+
+    - name: Убедиться, что демон Docker запущен и включён при старте
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+      when: not docker_bin.stat.exists
+
+    - name: Клонировать репозиторий Dispatcher-App
+      git:
+        repo: "{{ project_repo }}"
+        dest: "{{ project_dest }}"
+        version: fix-qualifier-
+        update: yes
+        force: yes
+
+    - name: Привилегии на каталог проекта
+      file:
+        path: "{{ project_dest }}"
+        owner: "{{ ansible_user }}"
+        recurse: yes
+
+    - name: Перезаписать dispatcher properties
+      copy:
+        src: "{{ lookup('env','APPLICATION_DOCKER_PROPERTIES') }}"
+        dest: "{{ project_dest }}/Bot/dispatcher/src/main/resources/application-docker.properties"
+        owner: ubuntu
+        mode: '0644'
+        force: yes
+
+    - name: Перезаписать node properties
+      copy:
+        src: "{{ lookup('env','APPP_PROPERTIES') }}"
+        dest: "{{ project_dest }}/Bot/node/src/main/resources/appp.properties"
+        owner: ubuntu
+        mode: '0644'
+        force: yes
+
+    - name: Перезаписать .env
+      copy:
+        src: "{{ lookup('env','DOTENV') }}"
+        dest: "{{ project_dest }}/Bot/.env"
+        owner: ubuntu
+        mode: '0644'
+        force: yes
+
+    - name: Собрать JAR-файл через Maven
+      command: mvn clean package
+      args:
+        chdir: "{{ project_dest }}/Bot"
+      register: maven_build
+
+    - name: Проверить результат сборки Maven
+      assert:
+        that:
+          - maven_build.rc == 0
+        fail_msg: "Maven build failed"
+
+    - name: Поднять контейнеры через docker-compose (shell)
+      command: docker compose up -d --build
+      args:
+        chdir: "{{ project_dest }}/Bot"
+
+    - name: Дождаться доступности PostgreSQL
+      wait_for:
+        host: localhost
+        port: 5432
+        delay: 5
+        timeout: 60
+
+
+    - name: Дождаться доступности RabbitMQ
+      wait_for:
+        host: localhost
+        port: 5672
+        delay: 5
+        timeout: 60
+
+    - name: Проверить статус контейнеров
+      community.docker.docker_container_info:
+        name:
+          - postgres-db
+          - my_rabbitmq
+          - dispatcher-app
+      register: container_info
+
+    - name: Вывести информацию о контейнерах
+      debug:
+        var: container_info.results
