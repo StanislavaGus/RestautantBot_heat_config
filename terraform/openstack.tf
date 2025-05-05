@@ -6,14 +6,6 @@ terraform {
       source  = "terraform-provider-openstack/openstack"
       version = "3.0.0"
     }
-    null = {
-      source  = "hashicorp/null"
-      version = "3.2.1"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.10.0"
-    }
   }
 }
 
@@ -23,7 +15,6 @@ provider "openstack" {
   auth_url    = var.os_auth_url
   tenant_name = var.os_tenant_name
 }
-
 
 # --- Получаем существующую сеть по имени ---
 data "openstack_networking_network_v2" "students_net" {
@@ -69,7 +60,7 @@ resource "openstack_compute_instance_v2" "guseva_server" {
   flavor_name       = "m1.small"
   image_id          = "d608627a-ef62-452d-8a74-1c307cbe276d"  # ubuntu 22.04
   availability_zone = "nova"
-  key_pair          = "guseva_deploy_key"
+  key_pair          = "guseva1"
 
   network {
     port = openstack_networking_port_v2.server_port.id
