@@ -48,7 +48,7 @@
     - name: Добавить официальный репозиторий Docker
       ansible.builtin.apt_repository:
         repo: >
-          deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg]
+          deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg]
           https://download.docker.com/linux/ubuntu
           {{ ansible_lsb.codename }} stable
         filename: docker
