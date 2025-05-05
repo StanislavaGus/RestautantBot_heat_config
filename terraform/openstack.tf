@@ -3,8 +3,16 @@ terraform {
 
   required_providers {
     openstack = {
-      source  = "terraform-provider-openstack/openstack"
+      source  = "local/openstack"
       version = "3.0.0"
+    }
+    null = {
+      source  = "local/null"
+      version = "3.2.1"
+    }
+    time = {
+      source  = "local/time"
+      version = "0.10.0"
     }
   }
 }
