@@ -2,7 +2,7 @@ terraform {
   required_providers {
     openstack = {
       source  = "local/openstack"
-      version = "3.0.0"
+      version = "1.52.1"
     }
     null = {
       source  = "local/null"
