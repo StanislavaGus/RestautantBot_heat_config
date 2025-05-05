@@ -4,7 +4,7 @@ terraform {
   required_providers {
     openstack = {
       source  = "local/openstack"
-      version = "1.54.1"
+      version = "1.51.0"
     }
     null = {
       source  = "local/null"
@@ -23,6 +23,7 @@ provider "openstack" {
   auth_url    = var.os_auth_url
   tenant_name = var.os_tenant_name
 }
+
 
 # --- Получаем существующую сеть по имени ---
 data "openstack_networking_network_v2" "students_net" {
