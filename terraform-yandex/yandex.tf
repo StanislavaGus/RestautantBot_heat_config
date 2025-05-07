@@ -35,7 +35,7 @@ resource "yandex_vpc_subnet" "guseva_subnet" {
   name           = "guseva-subnet"
   zone           = var.zone
   network_id     = data.yandex_vpc_network.default.id
-  v4_cidr_blocks = ["192.168.30.0/24"]
+  v4_cidr_blocks = ["192.168.40.0/24"]
 }
 
 
