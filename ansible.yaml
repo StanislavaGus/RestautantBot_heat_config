@@ -1,6 +1,6 @@
 ---
 - name: Deploy Dispatcher‐App Stack via Ansible
-  hosts: all
+  hosts: restaurantbot
   become: yes
 
   vars:
